@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Récupération de PDFs Mock</title>
+</head>
+<body>
+  <h2>Entrer votre ID utilisateur :</h2>
+  <input type="text" id="userId" placeholder="Ex: 12345" />
+  <button onclick="getFiles()">Voir mes fichiers</button>
+
+  <h3>Vos fichiers PDF :</h3>
+  <ul id="fileList"></ul>
+
+  <script>
+    async function getFiles() {
+      const userId = document.getElementById("userId").value;
+      if (!userId) {
+        alert("Veuillez entrer un ID utilisateur !");
+        return;
+      }
+
+      try {
+        // Appel à l’API sur le même port 3000
+        const response = await fetch(`/api/files/${userId}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(`Erreur: ${errorData.message || errorData.error}`);
+          return;
+        }
+
+        const files = await response.json();
+
+        // Affichage
+        const fileList = document.getElementById("fileList");
+        fileList.innerHTML = "";
+
+        if (files.length === 0) {
+          fileList.innerHTML = "<li>Aucun fichier trouvé</li>";
+        } else {
+          files.forEach(file => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${file.url}" target="_blank">${file.name}</a>`;
+            fileList.appendChild(li);
+          });
+        }
+      } catch (error) {
+        alert("Erreur lors de la récupération des fichiers !");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
